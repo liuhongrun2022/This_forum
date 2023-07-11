@@ -29,6 +29,9 @@ def check_file(path, binary=False, default=""):
             with open(path, "w") as f:
                 f.write(default)
 
+check_dir(PATH_DATA)
+check_file(PATH_USERS, True, [])
+
 class User:
     def __init__(self, username, password):
         """
@@ -41,8 +44,8 @@ class User:
     
     def info(self):
         """
-        get someone's info
-        :return: info: (username, password)
+        获取某人的 info
+        :return: info `(username, password)`
         """
         return self.username, self.password
 
