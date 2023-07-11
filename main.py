@@ -6,20 +6,19 @@ PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
 
 def check_dir(path):
     """
-    check a directory if it exists
-    if it does not exist, make one
-    :param path: directory path
-    :return: none
+    检查一个目录是否存在，如果不存在就创建一个
+    :param path: 路径
+    :return: None
     """
     if not os.path.isdir(path):
         os.mkdir(path)
 
 def check_file(path, binary=False, default=""):
     """
-    check a file if it exists (if it does not exist, create one)
-    :param path: filepath
-    :param binary: is this file a binary file (default=false)
-    :param default: if this file does not exist, file content (default="")
+    检查一个文件是否存在，如果不存在就创建一个
+    :param path: 路径
+    :param binary: 是否为二进制文件
+    :param default: 如果此文件为空，默认值
     :return: none
     """
     if not os.path.isfile(path):
@@ -33,9 +32,9 @@ def check_file(path, binary=False, default=""):
 class User:
     def __init__(self, username, password):
         """
-        create one user (use user-defined class can make problem easier)
-        :param username: username
-        :param password: password
+        创建一个用户
+        :param username: 用户名
+        :param password: 密码
         """
         self.username = username
         self.password = password
@@ -49,10 +48,10 @@ class User:
 
 def add_user(username, password):
     """
-    add one user to data/users.fishc
-    :param username: username of new user
-    :param password: password of new user
-    :return: user that is added
+    将一个用户添加到 `data/users.fishc`
+    :param username: 用户名
+    :param password: 密码
+    :return: 被添加的用户
     """
     user = User(username, password)
     data = get_userlist()
@@ -62,10 +61,10 @@ def add_user(username, password):
 
 def remove_user(username, password):
     """
-    remove one user from userlist (data/users.fishc)
-    :param username: username of new user
-    :param password: password of new user
-    :return: user that is removed
+    从用户列表移除一个用户（data/users.fishc）
+    :param username: 用户名
+    :param password: 密码
+    :return: 被删除的用户
     """
     data = get_userlist()
     index = None
@@ -83,8 +82,8 @@ def remove_user(username, password):
 
 def get_userlist():
     """
-    get userlist (data/users.fishc)
-    :return: userlist
+    获取用户列表（data/users.fishc）
+    :return: 用户列表
     """
     with open(PATH_USERS, "rb") as f:
         data = load(f)
@@ -92,9 +91,9 @@ def get_userlist():
 
 def write_into_userlist(data):
     """
-    write into userlist (data/users.fishc)
-    :param data: target data
-    :return: new userlist
+    将内容写入用户列表（data/users.fishc）
+    :param data: 新内容
+    :return: None
     """
     with open(PATH_USERS, "wb") as f:
         dump(data)
