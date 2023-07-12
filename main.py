@@ -1,5 +1,5 @@
 import os
-import ttkbootstrap as ttk
+from ttkbootstrap import *
 from pickle import load, dump
 
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
@@ -102,5 +102,8 @@ def write_into_userlist(data):
     with open(PATH_USERS, "wb") as f:
         dump(data)
 
-root = ttk.Window("This Forum 1.0 Beta", "morph")
+root = Window("This Forum 1.0 Beta", "superhero")
+root.geometry("1800x1000+50+50")
+username = Entry(root, bootstyle="primary", width=50)
+username.grid(row=0, column=0, padx=20, pady=20)
 root.mainloop()
