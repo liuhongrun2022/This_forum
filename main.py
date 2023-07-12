@@ -100,10 +100,13 @@ def write_into_userlist(data):
     :return: None
     """
     with open(PATH_USERS, "wb") as f:
-        dump(data)
+        dump(data, f)
 
+font_size = 15
 root = Window("This Forum 1.0 Beta", "superhero")
 root.geometry("1800x1000+50+50")
-username = Entry(root, bootstyle="primary", width=50)
+username = Entry(root, bootstyle="info", width=50, font=("PingFang SC", font_size))
 username.grid(row=0, column=0, padx=20, pady=20)
+password = Entry(root, bootstyle="primary", width=50, font=("PingFang SC", font_size), show="*")
+password.grid(row=1, column=0, padx=20, pady=20)
 root.mainloop()
