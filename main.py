@@ -168,5 +168,6 @@ button_login = Button(root, bootstyle="success", text="登录", width=8)
 button_login["command"] = command_login
 button_login.grid(row=4, column=0, **option)
 button_register = Button(root, bootstyle="info", text="注册", width=8)
+button_register["command"] = command_register
 button_register.grid(row=4, column=1, **option)
 root.mainloop()
