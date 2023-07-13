@@ -1,9 +1,12 @@
 import os
 from ttkbootstrap import *
 from pickle import load, dump
+from threading import Thread, Timer
 
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
 PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
+
+CODE_SUCCESS, CODE_NOT_FOUND, CODE_DUPLICATE_USER = range(3)
 
 def check_dir(path):
     """
@@ -116,9 +119,13 @@ def login(username, password):
     :param password: 密码
     :return: (状态码, 找到的用户)
     """
-    users = get_user_infolist()
-    if (username, password) in users:
-        print("成功登录！")
+    users = get_userlist()
+    # 为了便于判断，用 for 循环
+    for user in users:
+        if user.info() == (username, password):
+            # 登录成功
+            return (CODE_SUCCESS, user)
+    return (CODE_NOT_FOUND, None)
 
 def register(username, password):
     """
@@ -130,10 +137,9 @@ def register(username, password):
     # 检查用户名是否已被使用
     users = get_user_infolist()
     if username in users:
-        print("用户名已被使用")
-        return
+        return (CODE_DUPLICATE_USER, None)
     # 创建用户
-    return add_user(username, password)
+    return (CODE_SUCCESS, add_user(username, password))
 
 def command_login():
     """
@@ -142,7 +148,12 @@ def command_login():
     """
     value_username = entry_username.get()
     value_password = entry_password.get()
-    login(value_username, value_password)
+    status, user = login(value_username, value_password)
+    if status != CODE_SUCCESS:
+        def disappear_error():
+            label_wrong.place_forget()
+        label_wrong.place(relx=0.8, rely=0.2, anchor="center")
+        Timer(2, disappear_error).start()
 
 def command_register():
     """
@@ -153,21 +164,27 @@ def command_register():
     value_password = entry_password.get()
     register(value_username, value_password)
 
-option = {"padx": 30, "pady": 10}
-root = Window("This Forum 1.0 Beta", "morph")
-root.geometry("1800x1000+50+50")
-label_username = Label(root, bootstyle="dark", text="用户名")
-label_username.grid(row=0, column=0, **option, columnspan=2)
-entry_username = Entry(root, bootstyle="info", width=30)
-entry_username.grid(row=1, column=0, **option, columnspan=2)
-label_password = Label(root, bootstyle="dark", text="密码")
-label_password.grid(row=2, column=0, **option, columnspan=2)
-entry_password = Entry(root, bootstyle="primary", width=30, show="*")
-entry_password.grid(row=3, column=0, **option, columnspan=2)
-button_login = Button(root, bootstyle="success", text="登录", width=8)
+grid_option = {"padx": 30, "pady": 10}
+root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz and liu2023", "superhero")
+root.geometry("800x800+50+50")
+
+label_wrong = Label(root, text="密码或用户名错误")
+
+frame_login = Frame(root)
+label_username = Label(frame_login, bootstyle="dark", text="用户名")
+label_username.grid(row=0, column=0, **grid_option, columnspan=2)
+entry_username = Entry(frame_login, bootstyle="info", width=30)
+entry_username.grid(row=1, column=0, **grid_option, columnspan=2)
+label_password = Label(frame_login, bootstyle="dark", text="密码")
+label_password.grid(row=2, column=0, **grid_option, columnspan=2)
+entry_password = Entry(frame_login, bootstyle="primary", width=30, show="*")
+entry_password.grid(row=3, column=0, **grid_option, columnspan=2)
+button_login = Button(frame_login, text="登录", width=8)
 button_login["command"] = command_login
-button_login.grid(row=4, column=0, **option)
-button_register = Button(root, bootstyle="info", text="注册", width=8)
+button_login.grid(row=4, column=0, **grid_option)
+button_register = Button(frame_login, text="注册", width=8)
 button_register["command"] = command_register
-button_register.grid(row=4, column=1, **option)
+button_register.grid(row=4, column=1, **grid_option)
+frame_login.place(relx=0.5, rely=0.5, anchor='center')
+
 root.mainloop()
