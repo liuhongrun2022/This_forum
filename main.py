@@ -1,4 +1,5 @@
 import os
+import string
 from ttkbootstrap import *
 from pickle import load, dump
 from threading import Thread
@@ -9,6 +10,8 @@ PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
 
 CODE_SUCCESS, CODE_NOT_FOUND, CODE_DUPLICATE = range(0, 3)
 CODE_WRONG_PARAMETER, CODE_LENGTH_ERROR = range(3, 5)
+
+SAFE_LOWEST, SAFE_1, SAFE_2, SAFE_3, SAFE_HIGHEST = range(5)
 
 def check_dir(path):
     """
@@ -195,14 +198,59 @@ def show_message(obj):
     显示一条消息
     :param obj: 消息对象（`Label`）
     :return: None
-    `"""
+    """
     obj.place(**grid_option2)
     Thread(target=disappear, args=(obj, "place", 1, 0.1)).start()
+
+def check_password_safe_level(pwd):
+    """
+    检查密码的安全级别。规则如下：
+
+    |             判断条件         | 判断结果 |    返回值      |
+    |:-----------------------------|:---------|:---------------|
+    | 密码长度 < 10                | 不安全   | `SAFE_LOWEST`  |
+    | 密码只含有数字               | 不太安全 | `SAFE_1`       |
+    | 密码只有大/小写字母          | 中等     | `SAFE_2`       |
+    | 密码有字母和数字             | 有点安全 | `SAFE_3`       |
+    | 密码有数字、大小写字母和符号 | 安全     | `SAFE_HIGHEST` |
+
+    :param pwd: 密码
+    :return: 参考表格
+    """
+    if len(pwd) < 10:
+        return SAFE_LOWEST
+    number = False
+    lowercase = False
+    uppercase = False
+    punctuation = False
+    for char in pwd:
+        # 避免二次判断
+        if not number and char in string.digits:
+            number = True
+        if not lowercase and char in string.ascii_lowercase:
+            lowercase = True
+        if not uppercase and char in string.ascii_uppercase:
+            uppercase = True
+        if not punctuation and char in string.punctuation:
+            punctuation = True
+    result = (number, lowercase, uppercase, punctuation)
+    result_count = result.count(True)
+    if number and result_count == 1:
+        # 只有数字
+        return SAFE_1
+    if (lowercase or uppercase) and result_count == 1:
+        # 只有大或小写字母
+        return SAFE_2
+    if (lowercase or uppercase) and number and 2 <= result_count < 4:
+        # 大/小写字母且有数字
+        return SAFE_3
+    if lowercase and uppercase and number and punctuation:
+        return SAFE_HIGHEST
 
 grid_option1 = {"padx": 30, "pady": 10}
 grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
 
-root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz and liu2023", "morph")
+root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz", "morph")
 root.geometry("800x800+50+50")
 
 label_message1 = Label(root, bootstyle="danger", text="密码或用户名错误")
