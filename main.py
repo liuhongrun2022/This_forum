@@ -1,7 +1,7 @@
 import os
 from ttkbootstrap import *
 from pickle import load, dump
-from threading import Thread, Timer
+from threading import Thread
 from time import sleep
 
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
@@ -150,10 +150,11 @@ def command_login():
     """
     value_username = entry_username.get()
     value_password = entry_password.get()
-    status, user = login(value_username, value_password)
-    if status != CODE_SUCCESS:
-        label_wrong.place(relx=0.8, rely=0.2, anchor="center")
-        Thread(target=disappear, args=(label_wrong, "place", 1, 0.1)).start()
+    status = login(value_username, value_password)[0]
+    if status == CODE_SUCCESS:
+        show_message(label_message2)
+    else:
+        show_message(label_message1)
 
 def command_register():
     """
@@ -162,7 +163,9 @@ def command_register():
     """
     value_username = entry_username.get()
     value_password = entry_password.get()
-    register(value_username, value_password)
+    status = register(value_username, value_password)[0]
+    if status == CODE_SUCCESS:
+        show_message(label_message3)
 
 def disappear(obj, method, time1, time2):
     """
@@ -187,27 +190,40 @@ def disappear(obj, method, time1, time2):
     # 使控件消失
     getattr(obj, f"{method}_forget")()
 
-grid_option = {"padx": 30, "pady": 10}
+def show_message(obj):
+    """
+    显示一条消息
+    :param obj: 消息对象（`Label`）
+    :return: None
+    `"""
+    obj.place(**grid_option2)
+    Thread(target=disappear, args=(obj, "place", 1, 0.1)).start()
+
+grid_option1 = {"padx": 30, "pady": 10}
+grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "center"}
+
 root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz and liu2023", "morph")
 root.geometry("800x800+50+50")
 
-label_wrong = Label(root, text="密码或用户名错误")
+label_message1 = Label(root, bootstyle="danger", text="密码或用户名错误")
+label_message2 = Label(root, bootstyle="success", text="登录成功！")
+label_message3 = Label(root, bootstyle="success", text="注册成功！")
 
 frame_login = Frame(root)
 label_username = Label(frame_login, bootstyle="dark", text="用户名")
-label_username.grid(row=0, column=0, **grid_option, columnspan=2)
+label_username.grid(row=0, column=0, **grid_option1, columnspan=2)
 entry_username = Entry(frame_login, bootstyle="info", width=30)
-entry_username.grid(row=1, column=0, **grid_option, columnspan=2)
+entry_username.grid(row=1, column=0, **grid_option1, columnspan=2)
 label_password = Label(frame_login, bootstyle="dark", text="密码")
-label_password.grid(row=2, column=0, **grid_option, columnspan=2)
+label_password.grid(row=2, column=0, **grid_option1, columnspan=2)
 entry_password = Entry(frame_login, bootstyle="primary", width=30, show="*")
-entry_password.grid(row=3, column=0, **grid_option, columnspan=2)
+entry_password.grid(row=3, column=0, **grid_option1, columnspan=2)
 button_login = Button(frame_login, text="登录", width=8)
 button_login["command"] = command_login
-button_login.grid(row=4, column=0, **grid_option)
+button_login.grid(row=4, column=0, **grid_option1)
 button_register = Button(frame_login, text="注册", width=8)
 button_register["command"] = command_register
-button_register.grid(row=4, column=1, **grid_option)
+button_register.grid(row=4, column=1, **grid_option1)
 frame_login.place(relx=0.5, rely=0.5, anchor='center')
 
 root.mainloop()
