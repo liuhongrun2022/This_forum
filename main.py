@@ -2,11 +2,13 @@ import os
 from ttkbootstrap import *
 from pickle import load, dump
 from threading import Thread, Timer
+from time import sleep
 
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
 PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
 
-CODE_SUCCESS, CODE_NOT_FOUND, CODE_DUPLICATE_USER = range(3)
+CODE_SUCCESS, CODE_NOT_FOUND, CODE_DUPLICATE = range(0, 3)
+CODE_WRONG_PARAMETER = range(3, 4)
 
 def check_dir(path):
     """
@@ -137,7 +139,7 @@ def register(username, password):
     # 检查用户名是否已被使用
     users = get_user_infolist()
     if username in users:
-        return (CODE_DUPLICATE_USER, None)
+        return (CODE_DUPLICATE, None)
     # 创建用户
     return (CODE_SUCCESS, add_user(username, password))
 
@@ -150,10 +152,8 @@ def command_login():
     value_password = entry_password.get()
     status, user = login(value_username, value_password)
     if status != CODE_SUCCESS:
-        def disappear_error():
-            label_wrong.place_forget()
         label_wrong.place(relx=0.8, rely=0.2, anchor="center")
-        Timer(2, disappear_error).start()
+        Thread(target=disappear, args=(label_wrong, "place", 1, 0.1)).start()
 
 def command_register():
     """
@@ -164,8 +164,31 @@ def command_register():
     value_password = entry_password.get()
     register(value_username, value_password)
 
+def disappear(obj, method, time1, time2):
+    """
+    使某个控件在几秒后消失。（打字机特效，指定秒数少一个字符）
+
+    注意，请使用 `threading.Thread` 调用此函数，否则会造成窗口卡死。
+    :param obj: 控件
+    :param method: 控件使用的方法，为“place”、“pack”、“grid”中的一种
+    :param time1: 过多久才开始消失
+    :param time2: 消失的时间，多久消失一个字
+    :return: 状态码
+    """
+    # 先提前搞到文字，到时候消失了要放回去
+    text = obj["text"]
+    # 等待
+    sleep(time1)
+    while obj["text"]:
+        # 减少一个字
+        obj["text"] = obj["text"][:-1]
+        sleep(time2)
+    obj["text"] = text
+    # 使控件消失
+    getattr(obj, f"{method}_forget")()
+
 grid_option = {"padx": 30, "pady": 10}
-root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz and liu2023", "superhero")
+root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz and liu2023", "morph")
 root.geometry("800x800+50+50")
 
 label_wrong = Label(root, text="密码或用户名错误")
