@@ -8,7 +8,7 @@ PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
 PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
 
 CODE_SUCCESS, CODE_NOT_FOUND, CODE_DUPLICATE = range(0, 3)
-CODE_WRONG_PARAMETER = range(3, 4)
+CODE_WRONG_PARAMETER, CODE_LENGTH_ERROR = range(3, 5)
 
 def check_dir(path):
     """
@@ -98,13 +98,6 @@ def get_userlist():
         data = load(f)
     return data
 
-def get_user_infolist():
-    """
-    获取所有用户的 info
-    :return: info [(username, password), ...]
-    """
-    return [user.info() for user in get_userlist()]
-
 def write_into_userlist(data):
     """
     将内容写入用户列表（data/users.fishc）
@@ -116,7 +109,7 @@ def write_into_userlist(data):
 
 def login(username, password):
     """
-    登录进一个账号（如果找不到用户，元组第二项会返回 `None`）
+    登录进一个账号
     :param username: 用户名
     :param password: 密码
     :return: (状态码, 找到的用户)
@@ -137,7 +130,9 @@ def register(username, password):
     :return: (状态码, 新用户)
     """
     # 检查用户名是否已被使用
-    users = get_user_infolist()
+    users = [user.username for user in get_userlist()]
+    if not 3 < len(username) < 10:
+        return (CODE_LENGTH_ERROR, None)
     if username in users:
         return (CODE_DUPLICATE, None)
     # 创建用户
@@ -153,6 +148,7 @@ def command_login():
     status = login(value_username, value_password)[0]
     if status == CODE_SUCCESS:
         show_message(label_message2)
+        frame_login.place_forget()
     else:
         show_message(label_message1)
 
@@ -166,6 +162,10 @@ def command_register():
     status = register(value_username, value_password)[0]
     if status == CODE_SUCCESS:
         show_message(label_message3)
+    elif status == CODE_DUPLICATE:
+        show_message(label_message4)
+    elif status == CODE_LENGTH_ERROR:
+        show_message(label_message5)
 
 def disappear(obj, method, time1, time2):
     """
@@ -200,7 +200,7 @@ def show_message(obj):
     Thread(target=disappear, args=(obj, "place", 1, 0.1)).start()
 
 grid_option1 = {"padx": 30, "pady": 10}
-grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "center"}
+grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
 
 root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz and liu2023", "morph")
 root.geometry("800x800+50+50")
@@ -208,6 +208,8 @@ root.geometry("800x800+50+50")
 label_message1 = Label(root, bootstyle="danger", text="密码或用户名错误")
 label_message2 = Label(root, bootstyle="success", text="登录成功！")
 label_message3 = Label(root, bootstyle="success", text="注册成功！")
+label_message4 = Label(root, bootstyle="danger", text="用户名已存在")
+label_message5 = Label(root, bootstyle="danger", text="用户名字符数限制：3-10")
 
 frame_login = Frame(root)
 label_username = Label(frame_login, bootstyle="dark", text="用户名")
