@@ -8,8 +8,14 @@ from time import sleep
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
 PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
 
-CODE_SUCCESS, CODE_NOT_FOUND, CODE_DUPLICATE = range(0, 3)
-CODE_WRONG_PARAMETER, CODE_LENGTH_ERROR = range(3, 5)
+(
+    CODE_SUCCESS,
+    CODE_NOT_FOUND,
+    CODE_DUPLICATE,
+    CODE_WRONG_PARAMETER,
+    CODE_LENGTH_ERROR,
+    CODE_WEAK_PASSWORD
+) = range(6)
 
 SAFE_LOWEST, SAFE_1, SAFE_2, SAFE_3, SAFE_HIGHEST = range(5)
 
@@ -134,10 +140,21 @@ def register(username, password):
     """
     # 检查用户名是否已被使用
     users = [user.username for user in get_userlist()]
-    if not 3 < len(username) < 10:
+    if not 3 <= len(username) < 11:
         return (CODE_LENGTH_ERROR, None)
     if username in users:
         return (CODE_DUPLICATE, None)
+    # 密码强度
+    password_strength = check_password_strength(password)
+    # 必须达到 SAFE_3 级别
+    if password_strength < SAFE_3:
+        if password_strength == SAFE_LOWEST:
+            show_message(label_password_weak0)
+        elif password_strength == SAFE_1:
+            show_message(label_password_weak1)
+        elif password_strength == SAFE_2:
+            show_message(label_password_weak2)
+        
     # 创建用户
     return (CODE_SUCCESS, add_user(username, password))
 
@@ -202,7 +219,7 @@ def show_message(obj):
     obj.place(**grid_option2)
     Thread(target=disappear, args=(obj, "place", 1, 0.1)).start()
 
-def check_password_safe_level(pwd):
+def check_password_strength(pwd):
     """
     检查密码的安全级别。规则如下：
 
@@ -258,6 +275,10 @@ label_message2 = Label(root, bootstyle="success", text="登录成功！")
 label_message3 = Label(root, bootstyle="success", text="注册成功！")
 label_message4 = Label(root, bootstyle="danger", text="用户名已存在")
 label_message5 = Label(root, bootstyle="danger", text="用户名字符数限制：3-10")
+
+label_password_weak0 = Label(root, bootstyle="danger", text="密码太弱，没有达到10个字符")
+label_password_weak1 = Label(root, bootstyle="danger", text="密码只有数字")
+label_password_weak2 = Label(root, bootstyle="danger", text="密码只有大写或小写字母")
 
 frame_login = Frame(root)
 label_username = Label(frame_login, bootstyle="dark", text="用户名")
