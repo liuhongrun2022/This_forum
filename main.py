@@ -279,7 +279,21 @@ def change_password_visiblity():
         entry_password["show"] = ""
         button_change_password_visiblity["text"] = "隐藏密码"
 
+def change_admin_tool_visiblity():
+    """
+    切换 Admin Tool 的可见性
+    :return: None
+    """
+    if bool(frame_admin_tool.winfo_manager()):
+        # 没隐藏
+        button_admin_tool["text"] = "打开 Admin Tool"
+    else:
+        frame_admin_tool.place(relx=0.9, rely=0.2, anchor="ne")
+        # 隐藏了
+        button_admin_tool["text"] = "关闭 Admin Tool"
+
 grid_option1 = {"padx": 10, "pady": 10}
+grid_option3 = {"padx": 5, "pady": 5}
 grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
 
 root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz", "morph")
@@ -319,5 +333,15 @@ button_register = Button(frame_login, text="注册", width=8)
 button_register["command"] = command_register
 button_register.grid(row=4, column=1, **grid_option1)
 
-frame_login.place(relx=0.5, rely=0.5, anchor='center')
+frame_login.place(relx=0.5, rely=0.5, anchor="center")
+
+button_admin_tool = Button(root, bootstyle="info", text="打开 Admin Tool")
+button_admin_tool["command"] = change_admin_tool_visiblity
+button_admin_tool.place(relx=0.8, rely=0.9, anchor="ne")
+
+frame_admin_tool = Frame(root)
+
+label_see_users = Label(frame_admin_tool, bootstyle="warning", text="查看用户列表")
+label_see_users.grid(row=0, column=0)
+
 root.mainloop()
