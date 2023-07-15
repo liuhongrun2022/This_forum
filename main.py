@@ -143,6 +143,7 @@ def register(username, password):
     if not 3 <= len(username) < 11:
         return (CODE_LENGTH_ERROR, None)
     if username in users:
+        print(users, username)
         return (CODE_DUPLICATE, None)
     # 密码强度
     password_strength = check_password_strength(password)
@@ -264,7 +265,21 @@ def check_password_strength(pwd):
     if lowercase and uppercase and number and punctuation:
         return SAFE_HIGHEST
 
-grid_option1 = {"padx": 30, "pady": 10}
+def change_password_visiblity():
+    """
+    切换密码输入框的可见性，如果密码没隐藏则隐藏，如果隐藏了就不隐藏
+    :return: None
+    """
+    if entry_password["show"] == "":
+        # 密码没有隐藏
+        entry_password["show"] = "*"
+        button_change_password_visiblity["text"] = "显示密码"
+    else:
+        # 密码隐藏了
+        entry_password["show"] = ""
+        button_change_password_visiblity["text"] = "隐藏密码"
+
+grid_option1 = {"padx": 10, "pady": 10}
 grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
 
 root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz", "morph")
@@ -281,20 +296,28 @@ label_password_weak1 = Label(root, bootstyle="danger", text="密码只有数字"
 label_password_weak2 = Label(root, bootstyle="danger", text="密码只有大写或小写字母")
 
 frame_login = Frame(root)
+
 label_username = Label(frame_login, bootstyle="dark", text="用户名")
 label_username.grid(row=0, column=0, **grid_option1, columnspan=2)
 entry_username = Entry(frame_login, bootstyle="info", width=30)
 entry_username.grid(row=1, column=0, **grid_option1, columnspan=2)
+
 label_password = Label(frame_login, bootstyle="dark", text="密码")
 label_password.grid(row=2, column=0, **grid_option1, columnspan=2)
-entry_password = Entry(frame_login, bootstyle="primary", width=30, show="*")
+entry_password = Entry(frame_login, bootstyle="primary", width=30)
 entry_password.grid(row=3, column=0, **grid_option1, columnspan=2)
+
+button_change_password_visiblity = Button(frame_login, bootstyle="primary", text="显示密码")
+change_password_visiblity()
+button_change_password_visiblity["command"] = change_password_visiblity
+button_change_password_visiblity.grid(row=3, column=2, **grid_option1)
+
 button_login = Button(frame_login, text="登录", width=8)
 button_login["command"] = command_login
 button_login.grid(row=4, column=0, **grid_option1)
 button_register = Button(frame_login, text="注册", width=8)
 button_register["command"] = command_register
 button_register.grid(row=4, column=1, **grid_option1)
-frame_login.place(relx=0.5, rely=0.5, anchor='center')
 
+frame_login.place(relx=0.5, rely=0.5, anchor='center')
 root.mainloop()
