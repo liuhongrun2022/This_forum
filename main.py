@@ -1,7 +1,7 @@
 import os
 import string
 from ttkbootstrap import *
-from tkinter import Text
+from tkinter import Text, Button
 from pickle import load, dump
 from threading import Thread
 from time import sleep
@@ -142,7 +142,6 @@ def register(username, password):
     # 检查用户名是否已被使用
     users = [user.username for user in get_userlist()]
     if username in users:
-        print(users, username)
         return (CODE_DUPLICATE, None)
     if username == "Admin":
         return (CODE_SUCCESS, add_user(username, password))
@@ -231,7 +230,7 @@ def check_password_strength(pwd):
     |:-----------------------------|:---------|:---------------|
     | 密码长度 < 10                | 不安全   | `SAFE_LOWEST`  |
     | 密码只含有数字               | 不太安全 | `SAFE_1`       |
-    | 密码只有大/小写字母          | 中等     | `SAFE_2`       |
+    | 密码只有字母                 | 中等     | `SAFE_2`       |
     | 密码有字母和数字             | 有点安全 | `SAFE_3`       |
     | 密码有数字、大小写字母和符号 | 安全     | `SAFE_HIGHEST` |
 
@@ -259,8 +258,8 @@ def check_password_strength(pwd):
     if number and result_count == 1:
         # 只有数字
         return SAFE_1
-    if (lowercase or uppercase) and result_count == 1:
-        # 只有大或小写字母
+    if (lowercase or uppercase) and 1 <= result_count < 3:
+        # 只有字母
         return SAFE_2
     if (lowercase or uppercase) and number and 2 <= result_count < 4:
         # 大/小写字母且有数字
@@ -309,14 +308,25 @@ def change_users_visiblity():
     else:
         button_show_userlist["text"] = "隐藏用户列表"
         text_users.grid(row=1, column=0, **temp2)
-        text_users.insert(END, '\n'.join([user.username for user in get_userlist()]))
+        text_users.insert(END, '\n'.join([' '.join(user.info()) for user in get_userlist()]))
 
 temp1 = {"padx": 10, "pady": 10}
 temp2 = {"padx": 5, "pady": 5}
 temp3 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
 
+bootstyle = {
+    "primary":   {"fg": "white", "bg": "#4582ec"},
+    "secondary": {"fg": "white", "bg": "#adb5db"},
+    "success":   {"fg": "white", "bg": "#02b875"},
+    "info":      {"fg": "white", "bg": "#17a2b8"},
+    "warning":   {"fg": "white", "bg": "#f0ad4e"},
+    "danger":    {"fg": "white", "bg": "#d9534f"},
+    "light":     {"fg": "black", "bg": "#f8f9fa"},
+    "dark":      {"fg": "white", "bg": "#343a40"}
+}
+
 root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz", "morph")
-root.geometry("800x800+50+50")
+root.geometry("1000x800+100+100")
 
 label_message1 = Label(root, bootstyle="danger", text="密码或用户名错误")
 label_message2 = Label(root, bootstyle="success", text="登录成功！")
@@ -340,27 +350,34 @@ label_password.grid(row=2, column=0, **temp1, columnspan=2)
 entry_password = Entry(frame_login, bootstyle="primary", width=30)
 entry_password.grid(row=3, column=0, **temp1, columnspan=2)
 
-button_change_password_visiblity = Button(frame_login, bootstyle="primary", text="显示密码")
-change_password_visiblity()
+button_change_password_visiblity = Button(frame_login, **bootstyle["primary"])
 button_change_password_visiblity["command"] = change_password_visiblity
 button_change_password_visiblity.grid(row=3, column=2, **temp1)
+change_password_visiblity()
 
-button_login = Button(frame_login, text="登录", width=8)
+button_login = Button(frame_login)
+button_login["text"] = "登录"
+button_login["width"] = 8
 button_login["command"] = command_login
 button_login.grid(row=4, column=0, **temp1)
-button_register = Button(frame_login, text="注册", width=8)
+
+button_register = Button(frame_login)
+button_register["text"] = "注册"
+button_register["width"] = 8
 button_register["command"] = command_register
 button_register.grid(row=4, column=1, **temp1)
 
 frame_login.place(relx=0.5, rely=0.5, anchor="center")
 
-button_admin_tool = Button(root, bootstyle="info", text="打开 Admin Tool")
+button_admin_tool = Button(root, **bootstyle["info"])
+button_admin_tool["text"] = "打开 Admin Tool"
 button_admin_tool["command"] = change_admin_tool_visiblity
 button_admin_tool.place(relx=0.8, rely=0.9, anchor="ne")
 
 frame_admin_tool = Frame(root)
 
-button_show_userlist = Button(frame_admin_tool, bootstyle="warning", text="查看用户列表")
+button_show_userlist = Button(frame_admin_tool, **bootstyle["warning"])
+button_show_userlist["text"] = "查看用户列表"
 button_show_userlist["command"] = change_users_visiblity
 button_show_userlist.grid(row=0, column=0, **temp2)
 
