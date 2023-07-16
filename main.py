@@ -1,6 +1,7 @@
 import os
 import string
 from ttkbootstrap import *
+from tkinter import Text
 from pickle import load, dump
 from threading import Thread
 from time import sleep
@@ -140,11 +141,13 @@ def register(username, password):
     """
     # 检查用户名是否已被使用
     users = [user.username for user in get_userlist()]
-    if not 3 <= len(username) < 11:
-        return (CODE_LENGTH_ERROR, None)
     if username in users:
         print(users, username)
         return (CODE_DUPLICATE, None)
+    if username == "Admin":
+        return (CODE_SUCCESS, add_user(username, password))
+    if not 3 <= len(username) < 11:
+        return (CODE_LENGTH_ERROR, None)
     # 密码强度
     password_strength = check_password_strength(password)
     # 必须达到 SAFE_3 级别
@@ -217,7 +220,7 @@ def show_message(obj):
     :param obj: 消息对象（`Label`）
     :return: None
     """
-    obj.place(**grid_option2)
+    obj.place(**temp3)
     Thread(target=disappear, args=(obj, "place", 1, 0.1)).start()
 
 def check_password_strength(pwd):
@@ -285,6 +288,7 @@ def change_admin_tool_visiblity():
     :return: None
     """
     if bool(frame_admin_tool.winfo_manager()):
+        frame_admin_tool.place_forget()
         # 没隐藏
         button_admin_tool["text"] = "打开 Admin Tool"
     else:
@@ -292,9 +296,24 @@ def change_admin_tool_visiblity():
         # 隐藏了
         button_admin_tool["text"] = "关闭 Admin Tool"
 
-grid_option1 = {"padx": 10, "pady": 10}
-grid_option3 = {"padx": 5, "pady": 5}
-grid_option2 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
+def change_users_visiblity():
+    """
+    管理用户（Admin Tool）
+    :return: None
+    """
+    # 以防万一
+    text_users.delete(0.0, END)
+    if bool(text_users.winfo_manager()):
+        button_show_userlist["text"] = "显示用户列表"
+        text_users.grid_forget()
+    else:
+        button_show_userlist["text"] = "隐藏用户列表"
+        text_users.grid(row=1, column=0, **temp2)
+        text_users.insert(END, '\n'.join([user.username for user in get_userlist()]))
+
+temp1 = {"padx": 10, "pady": 10}
+temp2 = {"padx": 5, "pady": 5}
+temp3 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
 
 root = Window("This Forum 1.0 Beta 测试版本 - By dddddgz", "morph")
 root.geometry("800x800+50+50")
@@ -312,26 +331,26 @@ label_password_weak2 = Label(root, bootstyle="danger", text="密码只有大写�
 frame_login = Frame(root)
 
 label_username = Label(frame_login, bootstyle="dark", text="用户名")
-label_username.grid(row=0, column=0, **grid_option1, columnspan=2)
+label_username.grid(row=0, column=0, **temp1, columnspan=2)
 entry_username = Entry(frame_login, bootstyle="info", width=30)
-entry_username.grid(row=1, column=0, **grid_option1, columnspan=2)
+entry_username.grid(row=1, column=0, **temp1, columnspan=2)
 
 label_password = Label(frame_login, bootstyle="dark", text="密码")
-label_password.grid(row=2, column=0, **grid_option1, columnspan=2)
+label_password.grid(row=2, column=0, **temp1, columnspan=2)
 entry_password = Entry(frame_login, bootstyle="primary", width=30)
-entry_password.grid(row=3, column=0, **grid_option1, columnspan=2)
+entry_password.grid(row=3, column=0, **temp1, columnspan=2)
 
 button_change_password_visiblity = Button(frame_login, bootstyle="primary", text="显示密码")
 change_password_visiblity()
 button_change_password_visiblity["command"] = change_password_visiblity
-button_change_password_visiblity.grid(row=3, column=2, **grid_option1)
+button_change_password_visiblity.grid(row=3, column=2, **temp1)
 
 button_login = Button(frame_login, text="登录", width=8)
 button_login["command"] = command_login
-button_login.grid(row=4, column=0, **grid_option1)
+button_login.grid(row=4, column=0, **temp1)
 button_register = Button(frame_login, text="注册", width=8)
 button_register["command"] = command_register
-button_register.grid(row=4, column=1, **grid_option1)
+button_register.grid(row=4, column=1, **temp1)
 
 frame_login.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -341,7 +360,10 @@ button_admin_tool.place(relx=0.8, rely=0.9, anchor="ne")
 
 frame_admin_tool = Frame(root)
 
-label_see_users = Label(frame_admin_tool, bootstyle="warning", text="查看用户列表")
-label_see_users.grid(row=0, column=0)
+button_show_userlist = Button(frame_admin_tool, bootstyle="warning", text="查看用户列表")
+button_show_userlist["command"] = change_users_visiblity
+button_show_userlist.grid(row=0, column=0, **temp2)
+
+text_users = Text(frame_admin_tool, width=10, height=10)
 
 root.mainloop()
