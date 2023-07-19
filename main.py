@@ -1,11 +1,11 @@
 import os
 import string
-import datetime
 from ttkbootstrap import *
 from tkinter import Text, Button
 from pickle import load, dump
 from threading import Thread
 from time import sleep
+import datetime
 
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
 PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
@@ -49,6 +49,7 @@ def check_file(path, binary=False, default=""):
 
 check_dir(PATH_DATA)
 check_file(PATH_USERS, True, [])
+check_file(PATH_THREADS, True, [])
 
 class User:
     count = 0
@@ -255,7 +256,8 @@ def command_new_thread():
     显示主题框
     :return: None
     """
-    text_new_thread.grid(row=0, column=0)
+    text_new_thread.grid(row=0, column=0, **temp1)
+    button_publish_thread.grid(row=0, column=1, **temp1)
 
 def command_publish_thread():
     """
@@ -263,7 +265,7 @@ def command_publish_thread():
     :return: None
     """
     thread = AThread(current_user.uid, text_new_thread.get("1.0", END))
-    thread.show(text_new_thread)
+    thread.put_into_Text(text_new_thread)
 
 def disappear(obj, method, time1, time2):
     """
