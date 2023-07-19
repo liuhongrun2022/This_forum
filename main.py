@@ -1,5 +1,6 @@
 import os
 import string
+import datetime
 from ttkbootstrap import *
 from tkinter import Text, Button
 from pickle import load, dump
@@ -49,6 +50,8 @@ check_dir(PATH_DATA)
 check_file(PATH_USERS, True, [])
 
 class User:
+    count = 0
+
     def __init__(self, username, password):
         """
         创建一个用户
@@ -57,20 +60,23 @@ class User:
         """
         self.username = username
         self.password = password
+        # uid，便于辨别用户
+        self.uid = User.count
+        User.count += 1
     
     def info(self):
         """
         获取某人的 info
         :return: info `(username, password)`
         """
-        return self.username, self.password
+        return (self.username, self.password)
 
 def add_user(username, password):
     """
     将一个用户添加到 `data/users.fishc`
     :param username: 用户名
     :param password: 密码
-    :return: 被添加的用户
+    :return: 被添加的用户的
     """
     user = User(username, password)
     data = get_userlist()
@@ -167,12 +173,14 @@ def command_login():
     作为 button 的 `command` 属性的函数，用于调用 `login()`
     :return: None
     """
+    global current_user
     value_username = entry_username.get()
     value_password = entry_password.get()
-    status = login(value_username, value_password)[0]
+    status, user = login(value_username, value_password)
     if status == CODE_SUCCESS:
         show_message(label_message2)
         frame_login.place_forget()
+        current_user = user
     else:
         show_message(label_message1)
 
@@ -190,6 +198,44 @@ def command_register():
         show_message(label_message4)
     elif status == CODE_LENGTH_ERROR:
         show_message(label_message5)
+
+class AThread:
+    def __init__(self, uid, content):
+        """
+        发布新主题
+        :param uid: uid
+        :param content: 主题内容
+        """
+        self.uid = uid
+        self.content = content
+        # 发表时间
+        self.publish_time = datetime.datetime.now()
+    
+    def put_into_Text(self, control: Text):
+        """
+        放进 `tkinter.Text` 控件里
+        :param control: 控件
+        :return: None
+        """
+        clear_Text(control)
+        user = [user for user in get_userlist() if user.uid == self.uid][0]
+        content = f'''{user.username} 发表于 {self.publish_time.strftime("%Y-%m-%d %H:%M:%S")}
+{self.content}'''
+        control.insert(INSERT, content)
+
+def command_new_thread():
+    """
+    显示主题框
+    :return: None
+    """
+    text_new_thread.grid(row=0, column=0)
+
+def command_publish_thread():
+    """
+    发布主题
+    :return: None
+    """
+    thread = AThread(current_user.uid, text_new_thread.get("1.0", END))
 
 def disappear(obj, method, time1, time2):
     """
@@ -302,18 +348,31 @@ def change_users_visiblity():
     :return: None
     """
     # 以防万一
-    text_users.delete(0.0, END)
+    clear_Text(text_users)
     if bool(text_users.winfo_manager()):
         button_show_userlist["text"] = "显示用户列表"
         text_users.grid_forget()
     else:
         button_show_userlist["text"] = "隐藏用户列表"
         text_users.grid(row=1, column=0, **temp2)
-        text_users.insert(END, '\n'.join([' '.join(user.info()) for user in get_userlist()]))
+        text_users.insert(END, '\n'.join([user.username for user in get_userlist()]))
+
+def clear_Text(control: Text):
+    """
+    清除 `tkinter.Text` 控件的所有内容
+    :return: None
+    """
+    # 文字清除
+    control.delete("1.0", END)
+    # tag 清除
+    tags = control.tag_names()
+    for tag in tags:
+        control.tag_delete(tag)
 
 temp1 = {"padx": 10, "pady": 10}
 temp2 = {"padx": 5, "pady": 5}
 temp3 = {"relx": 0.8, "rely": 0.2, "anchor": "ne"}
+current_user = None
 
 bootstyle = {
     "primary":   {"fg": "white", "bg": "#4582ec"},
@@ -369,6 +428,22 @@ button_register["command"] = command_register
 button_register.grid(row=4, column=1, **temp1)
 
 frame_login.place(relx=0.5, rely=0.5, anchor="center")
+
+frame_homepage = Frame(root)
+button_new_thread = Button(frame_homepage, **bootstyle["info"])
+button_new_thread["text"] = "新主题"
+button_new_thread["width"] = 8
+button_new_thread["command"] = command_new_thread
+button_new_thread.grid(row=0, column=0, **temp1)
+
+text_new_thread = Text(frame_homepage)
+text_new_thread["width"] = 100
+text_new_thread["height"] = 10
+
+button_publish_thread = Button(frame_homepage, **bootstyle["success"])
+button_publish_thread["text"] = "发表主题"
+button_publish_thread["width"] = 8
+button_publish_thread["command"] = command_publish_thread
 
 button_admin_tool = Button(root, **bootstyle["info"])
 button_admin_tool["text"] = "打开 Admin Tool"
