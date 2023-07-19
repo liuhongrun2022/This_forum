@@ -157,6 +157,7 @@ def register(username, password):
             show_message(label_password_weak1)
         elif password_strength == SAFE_2:
             show_message(label_password_weak2)
+        return (CODE_WEAK_PASSWORD, None)
         
     # 创建用户
     return (CODE_SUCCESS, add_user(username, password))
