@@ -9,6 +9,7 @@ from time import sleep
 
 PATH_DATA = os.path.join(os.path.dirname(__file__), "data")
 PATH_USERS = os.path.join(PATH_DATA, "users.fishc")
+PATH_THREADS = os.path.join(PATH_DATA, "threads.fishc")
 
 (
     CODE_SUCCESS,
@@ -181,6 +182,7 @@ def command_login():
         show_message(label_message2)
         frame_login.place_forget()
         current_user = user
+        frame_homepage.place(relx=0.5, rely=0.5, anchor="center")
     else:
         show_message(label_message1)
 
@@ -223,6 +225,31 @@ class AThread:
 {self.content}'''
         control.insert(INSERT, content)
 
+def get_threads():
+    """
+    获取主题列表
+    :return: Threads
+    """
+    with open(PATH_THREADS, "rb") as f:
+        data = load(f)
+    return data
+
+def add_thread(thread):
+    """
+    新建主题，写入主题文件
+    :param thread: `Thread` 对象
+    :return: None
+    """
+
+def write_into_threads(data):
+    """
+    在 `threads.fishc` 中写入内容
+    :param data: 要写入的内容
+    :return: None
+    """
+    with open(PATH_THREADS, "wb") as f:
+        dump(data, f)
+
 def command_new_thread():
     """
     显示主题框
@@ -236,6 +263,7 @@ def command_publish_thread():
     :return: None
     """
     thread = AThread(current_user.uid, text_new_thread.get("1.0", END))
+    thread.show(text_new_thread)
 
 def disappear(obj, method, time1, time2):
     """
